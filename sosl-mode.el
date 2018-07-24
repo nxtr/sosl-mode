@@ -28,9 +28,73 @@
 
 ;;; Code:
 
+(require 'soql-mode)
+
+(defgroup sosl nil
+  "Salesforce Object Search Language (SOSL)."
+  :group 'languages
+  :group 'salesforce
+  :prefix "sosl-")
+
+(defcustom sosl-mode-indent-basic 4
+  "Basic amount of indentation."
+  :type 'integer)
+
+(defcustom sosl-mode-hook nil
+  "Hook called by `sosl-mode'."
+  :type 'hook)
+
+(require 'smie)
+
+(defconst sosl-mode--grammar
+  (smie-prec2->grammar
+   (smie-bnf->prec2
+    '((stmt ("FIND" search-query)
+            (stmt "IN" exp)
+            (stmt "RETURNING" exp)
+            (stmt "LIMIT" num)
+            (stmt "OFFSET" num)
+            (stmt "ORDER" "BY" field)
+            (stmt "WHERE" exp)
+            (stmt "UPDATE" "TRACKING")
+            (stmt "UPDATE" "VIEWSTAT")
+            (stmt "USING" exp)
+            (stmt "WITH" exp)
+            (stmt "WITH" "DATA" "CATEGORY" exp)
+            (stmt "WITH" "METADATA" exp)
+            (stmt "WITH" "NETWORK" exp)
+            (stmt "WITH" "SNIPPET" exp)
+            (stmt "WITH" "SPELL_CORRECTION" exp))
+      (search-query)
+      (field)
+      (fields (field "," field))
+      (type)
+      (types (type "," type))
+      (exp)
+      (num))
+    '((assoc ",")))))
+
+(defun sosl-mode--rules (kind token)
+  (pcase (cons kind token)
+    (`(:elem . basic) sosl-mode-indent-basic)
+    (`(,_ . ",") (smie-rule-separator kind))
+    (`(:list-intro . ,(or `"WHERE")) t)))
+
+(defvar sosl-mode-syntax-table
+  (let ((table (make-syntax-table soql-mode-syntax-table)))
+    (modify-syntax-entry ?\" "\"" table)
+    (modify-syntax-entry ?\' "|"  table)
+    (modify-syntax-entry ?{  "|"  table)
+    (modify-syntax-entry ?}  "|"  table)
+    table))
+
 ;;;###autoload
 (define-derived-mode sosl-mode prog-mode "SOSL"
-  "Major mode for editing Salesforce Object Search Language (SOSL) code.")
+  "Major mode for editing Salesforce Object Search Language (SOSL) code."
+  (smie-setup sosl-mode--grammar #'sosl-mode--rules)
+  ;; Dummy comment settings
+  (setq comment-start "#")
+  (setq comment-start-skip "\\`.\\`"))
 
 (provide 'sosl-mode)
 

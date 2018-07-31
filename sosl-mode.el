@@ -1,6 +1,6 @@
 ;;; sosl-mode.el --- Salesforce SOSL Major Mode   -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015 Magnus Nyberg
+;; Copyright (C) 2015-2018 Magnus Nyberg
 
 ;; Author: Magnus Nyberg <magnus@nexter.se>
 ;; Keywords: languages, sosl, apex, force, sfdc, salesforce

@@ -44,6 +44,43 @@
   "Hook called by `sosl-mode'."
   :type 'hook)
 
+(defvar sosl-mode--kwds-regexp
+  (eval-when-compile
+    (list
+     (regexp-opt
+      '("FIND" "IN" "ALL" "FIELDS" "NAME" "EMAIL" "PHONE" "SIDEBAR"
+        "RETURNING"
+        "ORDER" "BY" "ASC" "DESC" "NULLS" "FIRST" "first" "LAST" "last"
+        "LIMIT"
+        "OFFSET"
+        "WHERE" "LIKE" "NOT" "INCLUDES" "includes" "EXCLUDES" "excludes"
+        "AND" "OR"
+        "null" "NULL" "toLabel" "TRUE" "true" "FALSE" "false"
+        "YESTERDAY" "TODAY" "TOMORROW"
+        "LAST_WEEK" "THIS_WEEK" "NEXT_WEEK"
+        "LAST_MONTH" "THIS_MONTH" "NEXT_MONTH"
+        "LAST_90_DAYS" "NEXT_90_DAYS"
+        "LAST_N_DAYS" "NEXT_N_DAYS"
+        "NEXT_N_WEEKS" "LAST_N_WEEKS"
+        "NEXT_N_MONTHS" "LAST_N_MONTHS"
+        "THIS_QUARTER" "LAST_QUARTER" "NEXT_QUARTER"
+        "NEXT_N_QUARTERS" "LAST_N_QUARTERS"
+        "THIS_YEAR" "LAST_YEAR" "NEXT_YEAR"
+        "NEXT_N_YEARS" "LAST_N_YEARS"
+        "THIS_FISCAL_QUARTER" "LAST_FISCAL_QUARTER" "NEXT_FISCAL_QUARTER"
+        "NEXT_N_FISCAL_QUARTERS" "LAST_N_FISCAL_QUARTERS"
+        "THIS_FISCAL_YEAR" "LAST_FISCAL_YEAR" "NEXT_FISCAL_YEAR"
+        "NEXT_N_FISCAL_YEARS" "LAST_N_FISCAL_YEARS"
+        "AT" "ABOVE" "BELOW" "ABOVE_OR_BELOW"
+        "FORMAT"
+        "WITH" "DATA" "CATEGORY" "HIGHLIGHT" "METADATA" "NETWORK" "SNIPPET"
+        "SPELL_CORRECTION"
+        "UPDATE" "TRACKING" "VIEWSTAT"
+        "USING"
+        "convertCurrency"
+        "DISTANCE" "GEOLOCATION")
+      'words))))
+
 (require 'smie)
 
 (defconst sosl-mode--grammar
@@ -91,6 +128,7 @@
 ;;;###autoload
 (define-derived-mode sosl-mode prog-mode "SOSL"
   "Major mode for editing Salesforce Object Search Language (SOSL) code."
+  (setq font-lock-defaults '(sosl-mode--kwds-regexp))
   (smie-setup sosl-mode--grammar #'sosl-mode--rules)
   ;; Dummy comment settings
   (setq comment-start "#")

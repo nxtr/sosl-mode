@@ -40,6 +40,12 @@
   "Basic amount of indentation."
   :type 'integer)
 
+(defcustom sosl-mode-keywords-case-fold nil
+  "You can specify if keyword highlighting and indentation should be
+case-insensitive."
+  :type '(choice (const :tag "Case-sensitive" nil)
+                 (const :tag "Case-insensitive" t)))
+
 (defcustom sosl-mode-hook nil
   "Hook called by `sosl-mode'."
   :type 'hook)
@@ -128,8 +134,18 @@
 ;;;###autoload
 (define-derived-mode sosl-mode prog-mode "SOSL"
   "Major mode for editing Salesforce Object Search Language (SOSL) code."
-  (setq font-lock-defaults '(sosl-mode--kwds-regexp))
-  (smie-setup sosl-mode--grammar #'sosl-mode--rules)
+  (setq font-lock-defaults
+        `(sosl-mode--kwds-regexp nil ,sosl-mode-keywords-case-fold))
+  (if sosl-mode-keywords-case-fold
+      (condition-case err
+          (smie-setup
+           (soql-mode--upcase-grammar sosl-mode--grammar) #'sosl-mode--rules
+           :backward-token #'soql-mode--upcase-backward-token
+           :forward-token #'soql-mode--upcase-forward-token)
+        (error (message "%s" (error-message-string err))
+               ;; Continue with case-sensitive grammar
+               (smie-setup sosl-mode--grammar #'sosl-mode--rules)))
+    (smie-setup sosl-mode--grammar #'sosl-mode--rules))
   ;; Dummy comment settings
   (setq comment-start "#")
   (setq comment-start-skip "\\`.\\`"))
